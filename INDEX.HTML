@@ -4,229 +4,659 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>EcoGuard | Save Nature, Save Our Future</title>
+  <title>EcoGuard | Protect Our Planet</title>
 
   <style>
+    /* =========================
+       ROOT & RESET
+    ========================== */
+    :root {
+      --bg: #061008;
+      --bg-soft: #0b1a0f;
+      --card: rgba(18, 40, 23, 0.78);
+      --card-solid: #102416;
+      --green: #9de678;
+      --green-dark: #56a943;
+      --green-light: #dcffd0;
+      --white: #f5fff2;
+      --muted: #aab9a9;
+      --border: rgba(190, 255, 177, 0.16);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      scroll-behavior: smooth;
     }
 
-    :root {
-      --bg: #08110b;
-      --card: #101b12;
-      --card2: #142419;
-      --green: #9fdb78;
-      --light-green: #d9f5c8;
-      --text: #f4f5ed;
-      --muted: #a7b0a5;
-      --border: rgba(255,255,255,0.12);
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
       font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: var(--white);
+      overflow-x: hidden;
       line-height: 1.6;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
+    body.menu-open {
+      overflow: hidden;
     }
 
-    /* NAVBAR */
-    nav {
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    /* =========================
+       SCROLLBAR
+    ========================== */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #061008;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--green-dark);
+      border-radius: 10px;
+    }
+
+    /* =========================
+       LOADING SCREEN
+    ========================== */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: #061008;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    #loader.hide {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-leaf {
+      width: 70px;
+      height: 70px;
+      border: 5px solid rgba(157, 230, 120, 0.15);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    #loader p {
+      color: var(--green);
+      margin-top: 18px;
+      letter-spacing: 3px;
+      font-size: 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================
+       PROGRESS BAR
+    ========================== */
+    #scrollProgress {
       position: fixed;
       top: 0;
       left: 0;
+      width: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--green-dark), var(--green));
+      z-index: 10001;
+      box-shadow: 0 0 15px var(--green);
+    }
+
+    /* =========================
+       PARTICLES
+    ========================== */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: rgba(157, 230, 120, 0.5);
+      border-radius: 50%;
+      animation: floatParticle linear infinite;
+    }
+
+    @keyframes floatParticle {
+      0% {
+        transform: translateY(110vh) translateX(0);
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 0.7;
+      }
+
+      80% {
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: translateY(-10vh) translateX(80px);
+        opacity: 0;
+      }
+    }
+
+    /* =========================
+       NAVBAR
+    ========================== */
+    nav {
+      position: fixed;
+      top: 4px;
+      left: 0;
       width: 100%;
-      z-index: 1000;
+      height: 76px;
+      padding: 0 7%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 18px 7%;
-      background: rgba(8, 17, 11, 0.94);
-      backdrop-filter: blur(10px);
+      z-index: 10000;
+      transition: 0.4s;
+    }
+
+    nav.scrolled {
+      background: rgba(6, 16, 8, 0.92);
+      backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
     }
 
     .logo {
-      font-size: 25px;
-      font-weight: bold;
+      font-size: 27px;
+      font-weight: 800;
+      letter-spacing: -1px;
       color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      border: 2px solid var(--green);
+      border-radius: 50% 50% 50% 10%;
+      transform: rotate(-30deg);
+      position: relative;
+      animation: leafPulse 3s infinite ease-in-out;
+    }
+
+    .logo-icon::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 23px;
+      background: var(--green);
+      left: 15px;
+      top: 4px;
+      transform: rotate(35deg);
+    }
+
+    @keyframes leafPulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 3px var(--green));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 12px var(--green));
+      }
     }
 
     .nav-links {
       display: flex;
-      gap: 18px;
-      font-size: 14px;
+      align-items: center;
+      gap: 20px;
     }
 
     .nav-links a {
       color: var(--muted);
+      font-size: 13px;
+      transition: 0.3s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 2px;
+      background: var(--green);
+      bottom: -7px;
+      left: 0;
       transition: 0.3s;
     }
 
-    .nav-links a:hover {
-      color: var(--green);
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--white);
     }
 
-    /* HERO */
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    .nav-action {
+      padding: 10px 17px;
+      background: var(--green);
+      color: #071008 !important;
+      border-radius: 30px;
+      font-weight: bold;
+    }
+
+    .nav-action::after {
+      display: none;
+    }
+
+    .menu-btn {
+      display: none;
+      background: transparent;
+      color: white;
+      border: 0;
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
     .hero {
       min-height: 100vh;
-      padding: 150px 7% 70px;
+      position: relative;
       display: flex;
       align-items: center;
+      padding: 130px 7% 70px;
+      overflow: hidden;
       background:
-        linear-gradient(rgba(5,15,8,0.55), rgba(5,15,8,0.9)),
-        url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1600&q=80");
+        linear-gradient(90deg, rgba(5, 14, 7, 0.95) 10%, rgba(5, 14, 7, 0.65) 55%, rgba(5, 14, 7, 0.82)),
+        url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1920&q=85");
       background-size: cover;
       background-position: center;
     }
 
-    .hero-content {
-      max-width: 850px;
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(115, 220, 89, 0.16), transparent 70%);
+      right: -200px;
+      top: 10%;
+      animation: glowMove 7s ease-in-out infinite;
     }
 
-    .status {
-      color: #ffcb70;
-      font-size: 14px;
+    @keyframes glowMove {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(-100px, 70px);
+      }
+    }
+
+    .hero-content {
+      max-width: 900px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 14px;
+      border: 1px solid rgba(157, 230, 120, 0.25);
+      background: rgba(157, 230, 120, 0.08);
+      color: var(--green);
+      border-radius: 30px;
+      font-size: 12px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      animation: fadeUp 1s ease both;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8dff73;
+      box-shadow: 0 0 0 rgba(141, 255, 115, 0.8);
+      animation: dotPulse 1.5s infinite;
+    }
+
+    @keyframes dotPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(141, 255, 115, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(141, 255, 115, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(141, 255, 115, 0);
+      }
     }
 
     .hero h1 {
-      font-size: clamp(45px, 8vw, 100px);
-      line-height: 1;
-      margin-bottom: 25px;
+      font-size: clamp(52px, 8vw, 110px);
+      line-height: 0.95;
+      letter-spacing: -4px;
+      animation: fadeUp 1s 0.2s ease both;
     }
 
     .hero h1 span {
       color: var(--green);
+      display: block;
     }
 
-    .hero p {
+    .hero-description {
       max-width: 650px;
-      color: #d5ddd3;
+      margin-top: 27px;
+      color: #d1dfd0;
       font-size: 18px;
+      animation: fadeUp 1s 0.4s ease both;
     }
 
-    /* STATS */
-    .stats {
+    .hero-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      animation: fadeUp 1s 0.6s ease both;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border-radius: 30px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #071008;
+      box-shadow: 0 10px 30px rgba(157, 230, 120, 0.15);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(157, 230, 120, 0.3);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border);
+      color: var(--white);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--green);
+      background: rgba(157, 230, 120, 0.08);
+    }
+
+    .hero-stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
+      gap: 14px;
       margin-top: 55px;
+      animation: fadeUp 1s 0.8s ease both;
     }
 
-    .stat {
-      background: rgba(5, 15, 8, 0.75);
-      border: 1px solid var(--border);
+    .stat-card {
       padding: 20px;
+      background: rgba(8, 22, 11, 0.72);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      transition: 0.35s;
     }
 
-    .stat h3 {
+    .stat-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(157, 230, 120, 0.4);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-number {
       color: var(--green);
-      font-size: 27px;
+      font-size: 30px;
+      font-weight: 800;
     }
 
-    .stat p {
+    .stat-card p {
       color: var(--muted);
-      font-size: 13px;
-      margin-top: 8px;
+      font-size: 12px;
+      margin-top: 5px;
     }
 
-    /* COMMON */
-    section {
-      padding: 100px 7%;
-    }
-
-    .section-label {
-      color: var(--green);
-      text-transform: uppercase;
+    .scroll-indicator {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--muted);
+      font-size: 11px;
       letter-spacing: 2px;
-      font-size: 13px;
-      margin-bottom: 10px;
+      text-transform: uppercase;
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 45px;
+      background: linear-gradient(var(--green), transparent);
+      margin-top: 10px;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translate(-50%, 0);
+      }
+
+      50% {
+        transform: translate(-50%, -10px);
+      }
+    }
+
+    /* =========================
+       GENERAL SECTION
+    ========================== */
+    section {
+      padding: 110px 7%;
+      position: relative;
+    }
+
+    .section-head {
+      max-width: 800px;
+      margin-bottom: 45px;
+    }
+
+    .section-tag {
+      color: var(--green);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: bold;
+      margin-bottom: 12px;
     }
 
     .section-title {
-      font-size: clamp(35px, 5vw, 65px);
-      margin-bottom: 25px;
-      line-height: 1.05;
+      font-size: clamp(40px, 5vw, 72px);
+      line-height: 1;
+      letter-spacing: -2px;
     }
 
     .section-text {
-      max-width: 750px;
       color: var(--muted);
-      margin-bottom: 35px;
       font-size: 17px;
+      margin-top: 22px;
+      max-width: 700px;
     }
 
-    /* TIP */
-    .tip-box {
-      margin: 40px 7%;
-      padding: 35px;
-      border: 1px solid var(--border);
-      background: var(--card);
+    /* =========================
+       REVEAL ANIMATION
+    ========================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
-    .tip-number {
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-70px);
+      transition: 0.9s ease;
+    }
+
+    .reveal-left.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(70px);
+      transition: 0.9s ease;
+    }
+
+    .reveal-right.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* =========================
+       DAILY ACTION
+    ========================== */
+    .daily-action {
+      padding: 35px 7%;
+      background: linear-gradient(90deg, #102416, #0c1c10);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .daily-box {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .daily-number {
       color: var(--green);
-      font-size: 14px;
+      font-size: 12px;
       letter-spacing: 2px;
     }
 
-    .tip-box h2 {
-      margin: 10px 0;
-      font-size: 32px;
+    .daily-box h3 {
+      font-size: 27px;
+      margin: 6px 0;
     }
 
-    .tip-box p {
+    .daily-box p {
       color: var(--muted);
-      max-width: 800px;
+      max-width: 700px;
     }
 
-    button {
-      border: none;
-      cursor: pointer;
-      padding: 13px 22px;
-      margin-top: 20px;
-      font-size: 15px;
-      font-weight: bold;
-      transition: 0.3s;
-    }
-
-    .primary-btn {
-      background: var(--green);
-      color: #08110b;
-    }
-
-    .primary-btn:hover {
-      transform: translateY(-3px);
-      opacity: 0.9;
-    }
-
-    /* NATURE */
+    /* =========================
+       NATURE
+    ========================== */
     .nature {
-      background: #0c160e;
+      background: var(--bg-soft);
     }
 
     .nature-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      gap: 70px;
       align-items: center;
     }
 
-    .nature-img img {
+    .image-card {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      min-height: 520px;
+      box-shadow: var(--shadow);
+    }
+
+    .image-card img {
       width: 100%;
-      height: 450px;
+      height: 100%;
+      position: absolute;
       object-fit: cover;
-      border-radius: 4px;
+      transition: transform 1s ease;
+    }
+
+    .image-card:hover img {
+      transform: scale(1.08);
+    }
+
+    .image-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(transparent 40%, rgba(4, 13, 6, 0.9));
+    }
+
+    .image-caption {
+      position: absolute;
+      bottom: 25px;
+      left: 25px;
+      z-index: 2;
+    }
+
+    .image-caption strong {
+      color: var(--green);
+      font-size: 25px;
     }
 
     .protocol-list {
@@ -235,162 +665,258 @@
     }
 
     .protocol-list li {
-      padding: 16px 0;
+      display: flex;
+      gap: 18px;
+      padding: 17px 0;
       border-bottom: 1px solid var(--border);
       color: var(--muted);
-    }
-
-    .protocol-list span {
-      color: var(--green);
-      margin-right: 15px;
-      font-weight: bold;
-    }
-
-    /* WATER */
-    .water {
-      background:
-        linear-gradient(rgba(4,12,7,.8), rgba(4,12,7,.9)),
-        url("https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2?auto=format&fit=crop&w=1600&q=80");
-      background-size: cover;
-      background-position: center;
-    }
-
-    .water-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      margin-top: 40px;
-    }
-
-    .water-card {
-      background: rgba(5,15,8,.75);
-      padding: 25px;
-      border: 1px solid var(--border);
-    }
-
-    .water-card h3 {
-      color: var(--green);
-      font-size: 27px;
-    }
-
-    .water-card p {
-      color: var(--muted);
-      margin-top: 8px;
-      font-size: 14px;
-    }
-
-    /* RECYCLE */
-    .recycle-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    .recycle-card {
-      padding: 30px;
-      background: var(--card);
-      border: 1px solid var(--border);
-    }
-
-    .recycle-card .number {
-      color: var(--green);
-      font-size: 35px;
-      font-weight: bold;
-    }
-
-    .recycle-card h3 {
-      font-size: 26px;
-      margin: 15px 0;
-    }
-
-    .recycle-card p {
-      color: var(--muted);
-    }
-
-    /* CLIMATE */
-    .climate {
-      background: #0c160e;
-    }
-
-    .climate-line {
-      display: flex;
-      align-items: flex-end;
-      gap: 15px;
-      height: 250px;
-      margin-top: 50px;
-    }
-
-    .bar {
-      flex: 1;
-      background: var(--green);
-      position: relative;
-      min-width: 60px;
       transition: 0.3s;
     }
 
-    .bar:hover {
-      opacity: 0.7;
+    .protocol-list li:hover {
+      color: var(--white);
+      padding-left: 8px;
     }
 
-    .bar span {
+    .protocol-number {
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    /* =========================
+       PROBLEM CARDS
+    ========================== */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .eco-card {
+      padding: 32px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: 0.4s;
+    }
+
+    .eco-card::before {
+      content: "";
       position: absolute;
-      bottom: -55px;
-      left: 0;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(157, 230, 120, 0.12), transparent 70%);
+      right: -70px;
+      top: -70px;
+    }
+
+    .eco-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(157, 230, 120, 0.4);
+      box-shadow: var(--shadow);
+    }
+
+    .card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 15px;
+      background: rgba(157, 230, 120, 0.1);
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      font-size: 24px;
+      margin-bottom: 22px;
+    }
+
+    .eco-card h3 {
+      font-size: 25px;
+      margin-bottom: 10px;
+    }
+
+    .eco-card p {
+      color: var(--muted);
+    }
+
+    /* =========================
+       WATER SECTION
+    ========================== */
+    .water {
+      background:
+        linear-gradient(rgba(5, 17, 9, 0.86), rgba(5, 17, 9, 0.94)),
+        url("https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2?auto=format&fit=crop&w=1920&q=85");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .water-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .water-stat {
+      padding: 28px;
+      border-radius: 18px;
+      background: rgba(6, 20, 9, 0.7);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .water-stat strong {
+      display: block;
+      font-size: 34px;
+      color: var(--green);
+    }
+
+    .water-stat span {
       color: var(--muted);
       font-size: 13px;
     }
 
-    /* LIFESTYLE */
-    .habit-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-
-    .habit {
+    /* =========================
+       RECYCLE
+    ========================== */
+    .step-card {
+      padding: 35px;
+      border-radius: 20px;
+      background: var(--card-solid);
       border: 1px solid var(--border);
-      padding: 25px;
-      background: var(--card);
+      transition: 0.4s;
     }
 
-    .habit h3 {
-      color: var(--light-green);
-      margin-bottom: 10px;
+    .step-card:hover {
+      transform: translateY(-10px);
+      background: #142c1a;
     }
 
-    .habit p {
+    .step-number {
+      font-size: 60px;
+      font-weight: 800;
+      color: rgba(157, 230, 120, 0.15);
+      line-height: 1;
+    }
+
+    .step-card h3 {
+      color: var(--green-light);
+      font-size: 28px;
+      margin: 15px 0 10px;
+    }
+
+    .step-card p {
       color: var(--muted);
-      font-size: 14px;
     }
 
-    /* CALCULATOR */
+    /* =========================
+       CLIMATE CHART
+    ========================== */
+    .climate {
+      background: var(--bg-soft);
+    }
+
+    .chart {
+      height: 380px;
+      display: flex;
+      align-items: flex-end;
+      gap: 25px;
+      padding: 30px 0 60px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chart-item {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+    }
+
+    .chart-bar {
+      width: 100%;
+      height: var(--bar-height);
+      background: linear-gradient(to top, var(--green-dark), var(--green));
+      border-radius: 10px 10px 0 0;
+      transform-origin: bottom;
+      transform: scaleY(0);
+      transition: transform 1.2s cubic-bezier(.2,.8,.2,1);
+      position: relative;
+    }
+
+    .chart-bar.animate {
+      transform: scaleY(1);
+    }
+
+    .chart-bar:hover {
+      filter: brightness(1.2);
+    }
+
+    .chart-bar span {
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--muted);
+      white-space: nowrap;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* =========================
+       LIFESTYLE
+    ========================== */
+    .habit-card {
+      min-height: 230px;
+    }
+
+    .habit-number {
+      color: rgba(157, 230, 120, 0.35);
+      font-size: 45px;
+      font-weight: bold;
+      position: absolute;
+      right: 25px;
+      top: 20px;
+    }
+
+    /* =========================
+       CALCULATOR
+    ========================== */
     .calculator {
-      background: #0c160e;
+      background: linear-gradient(135deg, #08170b, #102416);
     }
 
     .calculator-box {
-      max-width: 850px;
-      padding: 40px;
-      background: var(--card);
+      max-width: 950px;
+      margin: auto;
+      padding: 45px;
+      border-radius: 25px;
+      background: rgba(8, 22, 11, 0.75);
       border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
     }
 
-    label {
-      display: block;
-      margin-top: 25px;
-      margin-bottom: 10px;
+    .form-row {
+      margin-bottom: 30px;
+    }
+
+    .form-row label {
+      display: flex;
+      justify-content: space-between;
       font-weight: bold;
+      margin-bottom: 14px;
+    }
+
+    .form-row label span {
+      color: var(--green);
     }
 
     input[type="range"] {
       width: 100%;
       accent-color: var(--green);
-    }
-
-    .range-value {
-      color: var(--green);
-      margin-top: 8px;
-      display: block;
+      cursor: pointer;
     }
 
     .choice-group {
@@ -399,44 +925,65 @@
       flex-wrap: wrap;
     }
 
-    .choice {
-      background: transparent;
+    .choice-btn {
+      padding: 11px 17px;
+      background: rgba(255,255,255,0.03);
       border: 1px solid var(--border);
+      border-radius: 25px;
       color: var(--muted);
-      margin-top: 0;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
-    .choice.active {
+    .choice-btn:hover,
+    .choice-btn.active {
       background: var(--green);
       color: #071008;
       border-color: var(--green);
+      transform: translateY(-2px);
     }
 
-    .result {
-      margin-top: 35px;
-      padding: 25px;
-      border-left: 4px solid var(--green);
-      background: var(--card2);
+    .result-box {
+      margin-top: 40px;
+      padding: 30px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(157, 230, 120, 0.12), rgba(157, 230, 120, 0.03));
+      border: 1px solid rgba(157, 230, 120, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
     }
 
-    .result small {
+    .result-label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    #emission {
+      font-size: 65px;
+      color: var(--green);
+      line-height: 1;
+      margin: 7px 0;
+    }
+
+    .result-text {
+      max-width: 400px;
       color: var(--muted);
     }
 
-    .result h2 {
-      font-size: 40px;
-      color: var(--green);
-      margin: 5px 0;
-    }
-
-    /* PLEDGE */
+    /* =========================
+       PLEDGE
+    ========================== */
     .pledge {
       text-align: center;
       background:
-        linear-gradient(rgba(5,15,8,.75), rgba(5,15,8,.9)),
-        url("https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1600&q=80");
+        linear-gradient(rgba(5, 16, 8, 0.72), rgba(5, 16, 8, 0.92)),
+        url("https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1920&q=85");
       background-size: cover;
       background-position: center;
+      background-attachment: fixed;
     }
 
     .pledge-content {
@@ -444,10 +991,11 @@
       margin: auto;
     }
 
-    .pledge p {
+    .pledge-text {
+      color: #d7e4d5;
       font-size: 20px;
-      color: #d6ded4;
-      margin: 30px 0;
+      margin: 25px auto 35px;
+      max-width: 750px;
     }
 
     .pledge-form {
@@ -457,99 +1005,246 @@
     }
 
     .pledge-form input {
-      padding: 15px;
-      background: rgba(255,255,255,.08);
+      width: 100%;
+      padding: 15px 18px;
+      border-radius: 30px;
       border: 1px solid var(--border);
+      background: rgba(255,255,255,0.08);
       color: white;
       outline: none;
     }
 
-    /* FOOTER */
+    .pledge-form input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(157, 230, 120, 0.08);
+    }
+
+    #pledgeMessage {
+      margin-top: 22px;
+      color: var(--green);
+      min-height: 25px;
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
     footer {
-      padding: 60px 7% 25px;
-      background: #050b06;
+      padding: 70px 7% 25px;
+      background: #030904;
     }
 
     .footer-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
-      gap: 30px;
-      padding-bottom: 40px;
+      gap: 50px;
+      padding-bottom: 45px;
     }
 
-    footer h3 {
+    .footer-title {
       color: var(--green);
-      margin-bottom: 15px;
+      margin-bottom: 18px;
     }
 
-    footer p,
+    .footer-text,
     footer a {
       color: var(--muted);
-      display: block;
-      margin: 8px 0;
       font-size: 14px;
+      margin-bottom: 10px;
+      display: block;
+      transition: 0.3s;
+    }
+
+    footer a:hover {
+      color: var(--green);
+      padding-left: 5px;
     }
 
     .copyright {
       border-top: 1px solid var(--border);
-      padding-top: 25px;
-      color: var(--muted);
-      font-size: 13px;
+      padding-top: 22px;
       text-align: center;
+      color: var(--muted);
+      font-size: 12px;
     }
 
-    /* RESPONSIVE */
-    @media(max-width: 850px) {
-      nav {
-        padding: 15px 5%;
+    /* =========================
+       BACK TO TOP
+    ========================== */
+    #backTop {
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--green);
+      color: #071008;
+      font-size: 20px;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: 0.3s;
+      z-index: 999;
+    }
+
+    #backTop.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    #backTop:hover {
+      transform: translateY(-5px);
+    }
+
+    /* =========================
+       KEYFRAMES
+    ========================== */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
       }
 
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+    @media (max-width: 1000px) {
       .nav-links {
-        display: none;
+        gap: 13px;
       }
 
-      section {
-        padding: 70px 5%;
+      .nav-links a {
+        font-size: 11px;
       }
 
-      .stats,
-      .water-stats {
+      .hero-stats,
+      .water-grid {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .nature-grid,
-      .recycle-grid,
-      .habit-grid,
-      .footer-grid {
+      .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 800px) {
+      nav {
+        padding: 0 5%;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .nav-links {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        background: rgba(6, 16, 8, 0.98);
+        backdrop-filter: blur(15px);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px 7%;
+        gap: 18px;
+        transform: translateY(-120%);
+        opacity: 0;
+        transition: 0.4s;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .nav-links.open {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .nav-links a {
+        font-size: 16px;
+      }
+
+      .nature-grid {
         grid-template-columns: 1fr;
+        gap: 45px;
+      }
+
+      .image-card {
+        min-height: 400px;
       }
 
       .pledge-form {
         grid-template-columns: 1fr;
       }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .result-box {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
 
-    @media(max-width: 500px) {
-      .stats,
-      .water-stats {
-        grid-template-columns: 1fr;
+    @media (max-width: 600px) {
+      section {
+        padding: 80px 5%;
       }
 
       .hero {
-        padding-left: 5%;
-        padding-right: 5%;
+        padding: 120px 5% 80px;
       }
 
-      .tip-box {
-        margin: 30px 5%;
+      .hero h1 {
+        letter-spacing: -2px;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-stats,
+      .water-grid,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .daily-box {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .daily-action {
+        padding: 30px 5%;
       }
 
       .calculator-box {
         padding: 25px;
       }
 
-      .climate-line {
+      .chart {
         gap: 8px;
+      }
+
+      .chart-bar span {
+        font-size: 9px;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #emission {
+        font-size: 50px;
       }
     }
   </style>
@@ -557,597 +1252,1093 @@
 
 <body>
 
-<!-- NAVBAR -->
-<nav>
-  <div class="logo">EcoGuard</div>
-
-  <div class="nav-links">
-    <a href="#nature">Why Nature</a>
-    <a href="#wildlife">Wildlife</a>
-    <a href="#water">Water</a>
-    <a href="#recycle">Recycle</a>
-    <a href="#climate">Climate</a>
-    <a href="#lifestyle">Lifestyle</a>
-    <a href="#facts">Facts</a>
-    <a href="#action">Take Action</a>
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="loader-leaf"></div>
+    <p>LOADING ECOGUARD</p>
   </div>
-</nav>
 
+  <!-- SCROLL PROGRESS -->
+  <div id="scrollProgress"></div>
 
-<!-- HERO -->
-<section class="hero" id="home">
-  <div class="hero-content">
+  <!-- PARTICLES -->
+  <div id="particles"></div>
 
-    <div class="status">● System Status: Urgent</div>
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <a href="#home" class="logo">
+      <span class="logo-icon"></span>
+      EcoGuard
+    </a>
 
-    <h1>
-      Small Actions Today.<br>
-      <span>A Greener Tomorrow.</span>
-    </h1>
+    <div class="nav-links" id="navLinks">
+      <a href="#nature">Nature</a>
+      <a href="#wildlife">Wildlife</a>
+      <a href="#water">Water</a>
+      <a href="#recycle">Recycle</a>
+      <a href="#climate">Climate</a>
+      <a href="#lifestyle">Lifestyle</a>
+      <a href="#calculator">Calculator</a>
+      <a href="#action" class="nav-action">Take Action</a>
+    </div>
 
-    <p>
-      EcoGuard is a call to defend the planet's forests, waters,
-      wildlife and future. Every action matters.
-    </p>
+    <button class="menu-btn" id="menuBtn">☰</button>
+  </nav>
 
-    <div class="stats">
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-content">
 
-      <div class="stat">
-        <h3>4.12M</h3>
-        <p>Hectares of forest lost this year</p>
+      <div class="hero-tag">
+        <span class="pulse-dot"></span>
+        Planet Status: Action Needed
       </div>
 
-      <div class="stat">
-        <h3>42,108</h3>
-        <p>Species at risk</p>
+      <h1>
+        Small Actions.
+        <span>Greener Tomorrow.</span>
+      </h1>
+
+      <p class="hero-description">
+        Protect forests, save water, defend wildlife and reduce waste.
+        The future of our planet depends on the choices we make today.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="#action" class="btn btn-primary">
+          Join The Movement →
+        </a>
+
+        <a href="#nature" class="btn btn-outline">
+          Explore Our Planet ↓
+        </a>
       </div>
 
-      <div class="stat">
-        <h3>11M t</h3>
-        <p>Ocean plastic each year</p>
-      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-number counter" data-target="4.12" data-decimal="true">0</div>
+          <p>Million hectares of forest lost</p>
+        </div>
 
-      <div class="stat">
-        <h3>+1.15°C</h3>
-        <p>Global temperature anomaly</p>
+        <div class="stat-card">
+          <div class="stat-number counter" data-target="42108">0</div>
+          <p>Species currently at risk</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-number counter" data-target="11">0</div>
+          <p>Million tonnes of ocean plastic</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-number">+<span class="counter" data-target="1.15" data-decimal="true">0</span>°C</div>
+          <p>Global temperature anomaly</p>
+        </div>
       </div>
 
     </div>
-  </div>
-</section>
 
-
-<!-- DAILY TIP -->
-<div class="tip-box">
-  <div class="tip-number">DAILY CONSERVATION PROTOCOL #142</div>
-
-  <h2>Water Efficiency</h2>
-
-  <p id="tipText">
-    Shorten your morning routine by two minutes.
-    Saving water is one of the simplest forms of environmental action.
-  </p>
-
-  <button class="primary-btn" onclick="changeTip()">
-    Acknowledge Tip
-  </button>
-</div>
-
-
-<!-- NATURE -->
-<section class="nature" id="nature">
-
-  <div class="nature-grid">
-
-    <div class="nature-img">
-      <img src="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1000&q=80">
+    <div class="scroll-indicator">
+      Scroll to Explore
+      <div class="scroll-line"></div>
     </div>
+  </section>
 
-    <div>
-      <div class="section-label">Why Nature Matters</div>
+  <!-- DAILY ACTION -->
+  <div class="daily-action">
+    <div class="daily-box">
+      <div>
+        <div class="daily-number">DAILY ECO ACTION #<span id="tipNumber">001</span></div>
+        <h3 id="tipTitle">Save Every Drop</h3>
+        <p id="tipText">
+          Turn off the tap while brushing your teeth. A small daily habit can save a significant amount of water.
+        </p>
+      </div>
+
+      <button class="btn btn-primary" id="tipBtn">
+        Next Action →
+      </button>
+    </div>
+  </div>
+
+  <!-- NATURE -->
+  <section class="nature" id="nature">
+
+    <div class="nature-grid">
+      <div class="image-card reveal-left">
+        <img
+          src="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1200&q=85"
+          alt="Forest"
+        >
+
+        <div class="image-caption">
+          <strong>Nature is our life-support system.</strong>
+        </div>
+      </div>
+
+      <div class="reveal-right">
+        <div class="section-tag">Why Nature Matters</div>
+
+        <h2 class="section-title">
+          Earth's Living Network.
+        </h2>
+
+        <p class="section-text">
+          Forests, rivers, soil, oceans and wildlife work together to
+          maintain the systems that make life possible.
+        </p>
+
+        <ul class="protocol-list">
+          <li>
+            <span class="protocol-number">01</span>
+            Protect forests and restore degraded ecosystems.
+          </li>
+
+          <li>
+            <span class="protocol-number">02</span>
+            Preserve biodiversity and natural habitats.
+          </li>
+
+          <li>
+            <span class="protocol-number">03</span>
+            Support native plants and pollinators.
+          </li>
+
+          <li>
+            <span class="protocol-number">04</span>
+            Reduce pollution and unnecessary consumption.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- WILDLIFE -->
+  <section id="wildlife">
+
+    <div class="section-head reveal">
+      <div class="section-tag">Protect Wildlife</div>
 
       <h2 class="section-title">
-        The Earth's Neural Network
+        Biodiversity Is Our Shared Strength.
       </h2>
 
       <p class="section-text">
-        Nature is the biological infrastructure that sustains every
-        breath we take. Forests, soil, oceans and wildlife are all
-        connected.
-      </p>
-
-      <ul class="protocol-list">
-        <li><span>01</span> Panthera Tigris Conservation</li>
-        <li><span>02</span> Coral Reef Restoration</li>
-        <li><span>03</span> Amazonian Corridor Protection</li>
-        <li><span>04</span> Native Pollinator Recovery</li>
-      </ul>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- WILDLIFE -->
-<section id="wildlife">
-
-  <div class="section-label">Protect Wildlife</div>
-
-  <h2 class="section-title">
-    Biodiversity: The Silent Crisis
-  </h2>
-
-  <p class="section-text">
-    Every species plays an important role in maintaining the balance
-    of nature. Protecting wildlife means protecting our own future.
-  </p>
-
-  <div class="recycle-grid">
-
-    <div class="recycle-card">
-      <div class="number">01</div>
-      <h3>Protect Habitats</h3>
-      <p>Forests, wetlands and oceans provide homes for countless species.</p>
-    </div>
-
-    <div class="recycle-card">
-      <div class="number">02</div>
-      <h3>Stop Pollution</h3>
-      <p>Reducing plastic and harmful waste helps protect animals.</p>
-    </div>
-
-    <div class="recycle-card">
-      <div class="number">03</div>
-      <h3>Plant Native Trees</h3>
-      <p>Native plants provide food and shelter for local wildlife.</p>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- WATER -->
-<section class="water" id="water">
-
-  <div class="section-label">Save Water</div>
-
-  <h2 class="section-title">Every Drop Is Borrowed.</h2>
-
-  <p class="section-text">
-    Fresh and usable water is limited. Small changes in our daily
-    habits can save thousands of litres every year.
-  </p>
-
-  <div class="water-stats">
-
-    <div class="water-card">
-      <h3>20,000 L</h3>
-      <p>Possible water loss from a leaking tap per year</p>
-    </div>
-
-    <div class="water-card">
-      <h3>19 L</h3>
-      <p>Water that can be saved by shorter showers</p>
-    </div>
-
-    <div class="water-card">
-      <h3>2.2 B</h3>
-      <p>People without safe water access</p>
-    </div>
-
-    <div class="water-card">
-      <h3>0.5%</h3>
-      <p>Freshwater easily available for use</p>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- RECYCLE -->
-<section id="recycle">
-
-  <div class="section-label">Waste Management</div>
-
-  <h2 class="section-title">Reduce. Reuse. Recycle.</h2>
-
-  <p class="section-text">
-    The best waste is the waste that is never created.
-    Follow the correct order to reduce environmental impact.
-  </p>
-
-  <div class="recycle-grid">
-
-    <div class="recycle-card">
-      <div class="number">01</div>
-      <h3>Reduce</h3>
-      <p>
-        Refuse unnecessary products and reduce single-use plastic.
+        Every species contributes to a balanced ecosystem. Protecting
+        wildlife means protecting the natural systems that support us all.
       </p>
     </div>
 
-    <div class="recycle-card">
-      <div class="number">02</div>
-      <h3>Reuse</h3>
-      <p>
-        Repair, refill and reuse products whenever possible.
+    <div class="grid-3">
+      <div class="eco-card reveal">
+        <div class="card-icon">🌳</div>
+        <h3>Protect Habitats</h3>
+        <p>
+          Forests, wetlands and oceans provide essential homes for wildlife.
+        </p>
+      </div>
+
+      <div class="eco-card reveal">
+        <div class="card-icon">🐾</div>
+        <h3>Defend Species</h3>
+        <p>
+          Support conservation and reduce activities that threaten endangered animals.
+        </p>
+      </div>
+
+      <div class="eco-card reveal">
+        <div class="card-icon">🌱</div>
+        <h3>Restore Nature</h3>
+        <p>
+          Plant native species and help damaged ecosystems recover naturally.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WATER -->
+  <section class="water" id="water">
+
+    <div class="section-head reveal">
+      <div class="section-tag">Water Conservation</div>
+
+      <h2 class="section-title">
+        Every Drop Has A Future.
+      </h2>
+
+      <p class="section-text">
+        Water is essential for people, animals, agriculture and ecosystems.
+        Using it wisely is one of the easiest ways to create change.
       </p>
     </div>
 
-    <div class="recycle-card">
-      <div class="number">03</div>
-      <h3>Recycle</h3>
-      <p>
-        Separate clean and dry recyclable materials properly.
+    <div class="water-grid">
+      <div class="water-stat reveal">
+        <strong>20,000 L</strong>
+        <span>Potential yearly loss from a leaking tap</span>
+      </div>
+
+      <div class="water-stat reveal">
+        <strong>19 L</strong>
+        <span>Possible savings from shorter showers</span>
+      </div>
+
+      <div class="water-stat reveal">
+        <strong>2.2 B</strong>
+        <span>People lacking safely managed drinking water</span>
+      </div>
+
+      <div class="water-stat reveal">
+        <strong>1 Planet</strong>
+        <span>One shared water system to protect</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECYCLE -->
+  <section id="recycle">
+
+    <div class="section-head reveal">
+      <div class="section-tag">Waste Management</div>
+
+      <h2 class="section-title">
+        Reduce. Reuse. Recycle.
+      </h2>
+
+      <p class="section-text">
+        The best waste is the waste we never create. Start with reducing,
+        then reusing, and finally recycling responsibly.
       </p>
     </div>
 
-  </div>
-</section>
+    <div class="grid-3">
+      <div class="step-card reveal">
+        <div class="step-number">01</div>
+        <h3>Reduce</h3>
+        <p>
+          Buy only what you need and avoid unnecessary single-use products.
+        </p>
+      </div>
 
+      <div class="step-card reveal">
+        <div class="step-number">02</div>
+        <h3>Reuse</h3>
+        <p>
+          Repair, refill and repurpose products before replacing them.
+        </p>
+      </div>
 
-<!-- CLIMATE -->
-<section class="climate" id="climate">
-
-  <div class="section-label">Climate Change</div>
-
-  <h2 class="section-title">
-    A Warming Of Degrees,<br>A Change Of Everything.
-  </h2>
-
-  <div class="climate-line">
-
-    <div class="bar" style="height:25%">
-      <span>1980<br>+0.26°C</span>
+      <div class="step-card reveal">
+        <div class="step-number">03</div>
+        <h3>Recycle</h3>
+        <p>
+          Separate materials correctly and send recyclable waste to proper facilities.
+        </p>
+      </div>
     </div>
+  </section>
 
-    <div class="bar" style="height:40%">
-      <span>1995<br>+0.45°C</span>
-    </div>
+  <!-- CLIMATE -->
+  <section class="climate" id="climate">
 
-    <div class="bar" style="height:60%">
-      <span>2010<br>+0.72°C</span>
-    </div>
+    <div class="section-head reveal">
+      <div class="section-tag">Climate Change</div>
 
-    <div class="bar" style="height:90%">
-      <span>2025<br>+1.15°C</span>
-    </div>
+      <h2 class="section-title">
+        A Small Rise. A Big Change.
+      </h2>
 
-    <div class="bar" style="height:100%">
-      <span>Limit<br>+1.50°C</span>
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- LIFESTYLE -->
-<section id="lifestyle">
-
-  <div class="section-label">Weekly Challenge</div>
-
-  <h2 class="section-title">The Eco-Friendly Week</h2>
-
-  <div class="habit-grid">
-
-    <div class="habit">
-      <h3>Eat More Plants</h3>
-      <p>Try plant-based meals several times every week.</p>
-    </div>
-
-    <div class="habit">
-      <h3>Cycle One Commute</h3>
-      <p>Walk or cycle when possible instead of using a car.</p>
-    </div>
-
-    <div class="habit">
-      <h3>Line-Dry Laundry</h3>
-      <p>Reduce electricity use by drying clothes naturally.</p>
-    </div>
-
-    <div class="habit">
-      <h3>Refill, Don't Rebuy</h3>
-      <p>Use reusable bottles and containers.</p>
-    </div>
-
-    <div class="habit">
-      <h3>Buy Secondhand</h3>
-      <p>Give products a longer life before buying new ones.</p>
-    </div>
-
-    <div class="habit">
-      <h3>Compost Food</h3>
-      <p>Turn organic waste into useful compost.</p>
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- CARBON CALCULATOR -->
-<section class="calculator" id="facts">
-
-  <div class="section-label">Quantify Your Impact</div>
-
-  <h2 class="section-title">
-    Carbon Footprint Analysis Tool
-  </h2>
-
-  <div class="calculator-box">
-
-    <label>Household Energy Use</label>
-
-    <input
-      type="range"
-      id="energy"
-      min="0"
-      max="1000"
-      value="450"
-      oninput="calculateFootprint()"
-    >
-
-    <span class="range-value">
-      <span id="energyValue">450</span> kWh / month
-    </span>
-
-
-    <label>Dietary Habits</label>
-
-    <div class="choice-group" id="dietChoices">
-      <button class="choice active" data-value="1.5">Plant-Based</button>
-      <button class="choice" data-value="2.5">Balanced</button>
-      <button class="choice" data-value="4">High Meat</button>
-    </div>
-
-
-    <label>Daily Transport</label>
-
-    <div class="choice-group" id="transportChoices">
-      <button class="choice active" data-value="0.2">Walk / Cycle</button>
-      <button class="choice" data-value="1">Public Transit</button>
-      <button class="choice" data-value="3">Petrol Car</button>
-    </div>
-
-
-    <label>Short Flights Per Year</label>
-
-    <input
-      type="range"
-      id="flights"
-      min="0"
-      max="10"
-      value="2"
-      oninput="calculateFootprint()"
-    >
-
-    <span class="range-value">
-      <span id="flightValue">2</span> flights
-    </span>
-
-
-    <div class="result">
-      <small>ESTIMATED EMISSION</small>
-      <h2 id="emission">5.4</h2>
-      <small>tonnes CO₂e / year</small>
-      <p id="impactText">Near the global average</p>
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- PLEDGE -->
-<section class="pledge" id="action">
-
-  <div class="pledge-content">
-
-    <div class="section-label">Take Action</div>
-
-    <h2 class="section-title">The Promise.</h2>
-
-    <p>
-      I promise to protect the natural world — to be a steward of
-      water, a guardian of wildlife and a conscious consumer of
-      Earth's gifts.
-    </p>
-
-    <form class="pledge-form" onsubmit="submitPledge(event)">
-      <input type="text" id="name" placeholder="Full Name" required>
-
-      <input type="email" id="email" placeholder="Email Address" required>
-
-      <button type="submit" class="primary-btn">
-        Submit My Pledge →
-      </button>
-    </form>
-
-    <p id="pledgeMessage"></p>
-
-  </div>
-
-</section>
-
-
-<!-- FOOTER -->
-<footer>
-
-  <div class="footer-grid">
-
-    <div>
-      <h3>EcoGuard</h3>
-      <p>
-        Protect what remains. Restore what was lost.
-        Small actions can create a greener future.
+      <p class="section-text">
+        Rising temperatures affect weather, oceans, ecosystems and human life.
+        Reducing emissions can help limit future risks.
       </p>
     </div>
 
-    <div>
-      <h3>Movement</h3>
-      <a href="#home">Live Statistics</a>
-      <a href="#facts">Footprint Tool</a>
-      <a href="#lifestyle">Weekly Habits</a>
+    <div class="chart" id="climateChart">
+      <div class="chart-item">
+        <div class="chart-bar" style="--bar-height:25%">
+          <span>1980<br>+0.26°C</span>
+        </div>
+      </div>
+
+      <div class="chart-item">
+        <div class="chart-bar" style="--bar-height:42%">
+          <span>1995<br>+0.45°C</span>
+        </div>
+      </div>
+
+      <div class="chart-item">
+        <div class="chart-bar" style="--bar-height:65%">
+          <span>2010<br>+0.72°C</span>
+        </div>
+      </div>
+
+      <div class="chart-item">
+        <div class="chart-bar" style="--bar-height:85%">
+          <span>2025<br>+1.15°C</span>
+        </div>
+      </div>
+
+      <div class="chart-item">
+        <div class="chart-bar" style="--bar-height:100%">
+          <span>Limit<br>+1.50°C</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIFESTYLE -->
+  <section id="lifestyle">
+
+    <div class="section-head reveal">
+      <div class="section-tag">Green Lifestyle</div>
+
+      <h2 class="section-title">
+        Small Habits. Real Impact.
+      </h2>
     </div>
 
-    <div>
-      <h3>Contact</h3>
-      <p>hello@ecoguard.org</p>
-      <p>press@ecoguard.org</p>
-      <p>Field Station Alpha</p>
+    <div class="grid-3">
+
+      <div class="eco-card habit-card reveal">
+        <div class="habit-number">01</div>
+        <div class="card-icon">🥗</div>
+        <h3>Eat More Plants</h3>
+        <p>Include more plant-based meals in your weekly routine.</p>
+      </div>
+
+      <div class="eco-card habit-card reveal">
+        <div class="habit-number">02</div>
+        <div class="card-icon">🚲</div>
+        <h3>Choose Green Travel</h3>
+        <p>Walk, cycle or use public transport whenever possible.</p>
+      </div>
+
+      <div class="eco-card habit-card reveal">
+        <div class="habit-number">03</div>
+        <div class="card-icon">💡</div>
+        <h3>Save Energy</h3>
+        <p>Switch off lights and appliances when they are not needed.</p>
+      </div>
+
+      <div class="eco-card habit-card reveal">
+        <div class="habit-number">04</div>
+        <div class="card-icon">🧴</div>
+        <h3>Refill & Reuse</h3>
+        <p>Use reusable bottles, bags and containers.</p>
+      </div>
+
+      <div class="eco-card habit-card reveal">
+        <div class="habit-number">05</div>
+        <div class="card-icon">🛍️</div>
+        <h3>Buy Less</h3>
+        <p>Choose durable products and avoid unnecessary shopping.</p>
+      </div>
+
+      <div class="eco-card habit-card reveal">
+        <div class="habit-number">06</div>
+        <div class="card-icon">🌿</div>
+        <h3>Grow Green</h3>
+        <p>Plant trees and native plants to support local ecosystems.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CALCULATOR -->
+  <section class="calculator" id="calculator">
+
+    <div class="section-head reveal">
+      <div class="section-tag">Your Environmental Impact</div>
+
+      <h2 class="section-title">
+        Carbon Footprint Calculator.
+      </h2>
+
+      <p class="section-text">
+        Explore an estimated carbon footprint based on simple lifestyle choices.
+      </p>
     </div>
 
-  </div>
+    <div class="calculator-box reveal">
 
-  <div class="copyright">
-    © 2026 EcoGuard. Save Nature, Save Our Future.
-  </div>
+      <div class="form-row">
+        <label>
+          Household Energy
+          <span><span id="energyValue">450</span> kWh/month</span>
+        </label>
 
-</footer>
+        <input
+          type="range"
+          id="energy"
+          min="100"
+          max="1200"
+          value="450"
+        >
+      </div>
+
+      <div class="form-row">
+        <label>Diet</label>
+
+        <div class="choice-group" id="dietGroup">
+          <button type="button" class="choice-btn active" data-value="1.5">
+            Plant-Based
+          </button>
+
+          <button type="button" class="choice-btn" data-value="2.5">
+            Balanced
+          </button>
+
+          <button type="button" class="choice-btn" data-value="4">
+            High Meat
+          </button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Daily Transport</label>
+
+        <div class="choice-group" id="transportGroup">
+          <button type="button" class="choice-btn active" data-value="0.2">
+            Walk / Cycle
+          </button>
+
+          <button type="button" class="choice-btn" data-value="1">
+            Public Transport
+          </button>
+
+          <button type="button" class="choice-btn" data-value="3">
+            Private Car
+          </button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>
+          Short Flights Per Year
+          <span><span id="flightValue">2</span> flights</span>
+        </label>
+
+        <input
+          type="range"
+          id="flights"
+          min="0"
+          max="12"
+          value="2"
+        >
+      </div>
+
+      <div class="result-box">
+        <div>
+          <div class="result-label">ESTIMATED ANNUAL EMISSION</div>
+          <div id="emission">0.0</div>
+          <div>tonnes CO₂e / year</div>
+        </div>
+
+        <div class="result-text" id="impactText">
+          Calculating your estimated environmental impact...
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PLEDGE -->
+  <section class="pledge" id="action">
+
+    <div class="pledge-content reveal">
+      <div class="section-tag">Take Action Today</div>
+
+      <h2 class="section-title">
+        Make The Promise.
+      </h2>
+
+      <p class="pledge-text">
+        I promise to make conscious choices, protect nature,
+        reduce waste and help create a cleaner and greener future.
+      </p>
+
+      <form class="pledge-form" id="pledgeForm">
+        <input
+          type="text"
+          id="pledgeName"
+          placeholder="Your Full Name"
+          required
+        >
+
+        <input
+          type="email"
+          id="pledgeEmail"
+          placeholder="Your Email Address"
+          required
+        >
+
+        <button class="btn btn-primary" type="submit">
+          Make My Pledge →
+        </button>
+      </form>
+
+      <p id="pledgeMessage"></p>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+
+    <div class="footer-grid">
+
+      <div>
+        <h2 class="footer-title">EcoGuard</h2>
+
+        <p class="footer-text">
+          Protect what remains. Restore what was lost.
+          Build a greener future together.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="footer-title">Explore</h3>
+
+        <a href="#nature">Nature</a>
+        <a href="#wildlife">Wildlife</a>
+        <a href="#water">Water</a>
+        <a href="#climate">Climate</a>
+      </div>
+
+      <div>
+        <h3 class="footer-title">Take Action</h3>
+
+        <a href="#lifestyle">Green Lifestyle</a>
+        <a href="#calculator">Footprint Calculator</a>
+        <a href="#action">Make a Pledge</a>
+      </div>
+
+    </div>
+
+    <div class="copyright">
+      © <span id="year"></span> EcoGuard. Protect Nature. Protect Tomorrow.
+    </div>
+
+  </footer>
+
+  <!-- BACK TO TOP -->
+  <button id="backTop" aria-label="Back to top">↑</button>
 
 
-<script>
+  <script>
+    /* =========================
+       LOADER
+    ========================== */
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        document.getElementById("loader").classList.add("hide");
+      }, 700);
+    });
 
-  /* -------------------------------
-     DAILY TIP
-  -------------------------------- */
 
-  const tips = [
-    "Shorten your shower by two minutes to save water every day.",
-    "Carry a reusable water bottle instead of buying plastic bottles.",
-    "Switch off lights when you leave a room.",
-    "Use both sides of paper before recycling it.",
-    "Plant a native tree and help local wildlife.",
-    "Walk or cycle for short distances whenever possible."
-  ];
+    /* =========================
+       PARTICLES
+    ========================== */
+    const particleContainer = document.getElementById("particles");
 
-  let currentTip = 0;
+    for (let i = 0; i < 35; i++) {
+      const particle = document.createElement("span");
 
-  function changeTip() {
-    currentTip++;
+      particle.className = "particle";
 
-    if (currentTip >= tips.length) {
-      currentTip = 0;
+      particle.style.left = Math.random() * 100 + "%";
+      particle.style.animationDuration =
+        (8 + Math.random() * 12) + "s";
+
+      particle.style.animationDelay =
+        Math.random() * 10 + "s";
+
+      particle.style.width =
+        (2 + Math.random() * 5) + "px";
+
+      particle.style.height =
+        particle.style.width;
+
+      particleContainer.appendChild(particle);
     }
 
-    document.getElementById("tipText").innerText = tips[currentTip];
-  }
+
+    /* =========================
+       NAVIGATION
+    ========================== */
+    const navbar = document.getElementById("navbar");
+    const menuBtn = document.getElementById("menuBtn");
+    const navLinks = document.getElementById("navLinks");
+
+    menuBtn.addEventListener("click", function () {
+      navLinks.classList.toggle("open");
+      document.body.classList.toggle("menu-open");
+
+      menuBtn.innerHTML =
+        navLinks.classList.contains("open") ? "✕" : "☰";
+    });
+
+    document.querySelectorAll(".nav-links a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        navLinks.classList.remove("open");
+        document.body.classList.remove("menu-open");
+        menuBtn.innerHTML = "☰";
+      });
+    });
 
 
-  /* -------------------------------
-     CARBON FOOTPRINT CALCULATOR
-  -------------------------------- */
+    /* =========================
+       SCROLL PROGRESS & NAVBAR
+    ========================== */
+    const scrollProgress =
+      document.getElementById("scrollProgress");
 
-  let dietValue = 1.5;
-  let transportValue = 0.2;
+    const backTop =
+      document.getElementById("backTop");
+
+    window.addEventListener("scroll", function () {
+
+      const scrollTop =
+        document.documentElement.scrollTop;
+
+      const scrollHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+      const progress =
+        (scrollTop / scrollHeight) * 100;
+
+      scrollProgress.style.width =
+        progress + "%";
 
 
-  document.querySelectorAll("#dietChoices .choice").forEach(button => {
+      if (scrollTop > 50) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
 
-    button.addEventListener("click", function() {
 
-      document
-        .querySelectorAll("#dietChoices .choice")
-        .forEach(btn => btn.classList.remove("active"));
-
-      this.classList.add("active");
-
-      dietValue = Number(this.dataset.value);
-
-      calculateFootprint();
+      if (scrollTop > 500) {
+        backTop.classList.add("show");
+      } else {
+        backTop.classList.remove("show");
+      }
 
     });
 
-  });
-
-
-  document.querySelectorAll("#transportChoices .choice").forEach(button => {
-
-    button.addEventListener("click", function() {
-
-      document
-        .querySelectorAll("#transportChoices .choice")
-        .forEach(btn => btn.classList.remove("active"));
-
-      this.classList.add("active");
-
-      transportValue = Number(this.dataset.value);
-
-      calculateFootprint();
-
+    backTop.addEventListener("click", function () {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
     });
 
-  });
+
+    /* =========================
+       SCROLL REVEAL
+    ========================== */
+    const revealElements =
+      document.querySelectorAll(
+        ".reveal, .reveal-left, .reveal-right"
+      );
+
+    const revealObserver =
+      new IntersectionObserver(function (entries) {
+
+        entries.forEach(function (entry) {
+
+          if (entry.isIntersecting) {
+            entry.target.classList.add("active");
+            revealObserver.unobserve(entry.target);
+          }
+
+        });
+
+      }, {
+        threshold: 0.15
+      });
+
+    revealElements.forEach(function (element) {
+      revealObserver.observe(element);
+    });
 
 
-  function calculateFootprint() {
+    /* =========================
+       ANIMATED COUNTERS
+    ========================== */
+    const counters =
+      document.querySelectorAll(".counter");
 
+    let counterStarted = false;
+
+    function startCounters() {
+
+      if (counterStarted) return;
+
+      const heroStats =
+        document.querySelector(".hero-stats");
+
+      const position =
+        heroStats.getBoundingClientRect().top;
+
+      if (position < window.innerHeight) {
+
+        counterStarted = true;
+
+        counters.forEach(function (counter) {
+
+          const target =
+            Number(counter.dataset.target);
+
+          const decimal =
+            counter.dataset.decimal === "true";
+
+          const duration = 1800;
+          const startTime = performance.now();
+
+          function updateCounter(currentTime) {
+
+            const elapsed =
+              currentTime - startTime;
+
+            const progress =
+              Math.min(elapsed / duration, 1);
+
+            const value =
+              target * progress;
+
+            counter.innerText =
+              decimal
+                ? value.toFixed(2)
+                : Math.floor(value).toLocaleString();
+
+            if (progress < 1) {
+              requestAnimationFrame(updateCounter);
+            }
+
+          }
+
+          requestAnimationFrame(updateCounter);
+
+        });
+
+      }
+
+    }
+
+    startCounters();
+    window.addEventListener("scroll", startCounters);
+
+
+    /* =========================
+       DAILY ECO TIPS
+    ========================== */
+    const ecoTips = [
+      {
+        title: "Save Every Drop",
+        text: "Turn off the tap while brushing your teeth. Small daily habits can reduce unnecessary water waste."
+      },
+      {
+        title: "Carry Your Bottle",
+        text: "Use a reusable water bottle instead of buying single-use plastic bottles."
+      },
+      {
+        title: "Switch It Off",
+        text: "Turn off lights, fans and appliances when they are not needed."
+      },
+      {
+        title: "Say No To Single-Use",
+        text: "Choose reusable bags, cups and containers whenever possible."
+      },
+      {
+        title: "Plant Something Native",
+        text: "Native plants can support local birds, insects and pollinators."
+      },
+      {
+        title: "Walk One Extra Trip",
+        text: "For short distances, walking or cycling can reduce fuel use and emissions."
+      }
+    ];
+
+    let currentTip = 0;
+
+    document
+      .getElementById("tipBtn")
+      .addEventListener("click", function () {
+
+        currentTip =
+          (currentTip + 1) % ecoTips.length;
+
+        const tip =
+          ecoTips[currentTip];
+
+        document
+          .getElementById("tipTitle")
+          .innerText = tip.title;
+
+        document
+          .getElementById("tipText")
+          .innerText = tip.text;
+
+        document
+          .getElementById("tipNumber")
+          .innerText =
+            String(currentTip + 1).padStart(3, "0");
+
+      });
+
+
+    /* =========================
+       CLIMATE CHART ANIMATION
+    ========================== */
+    const climateChart =
+      document.getElementById("climateChart");
+
+    const chartObserver =
+      new IntersectionObserver(function (entries) {
+
+        entries.forEach(function (entry) {
+
+          if (entry.isIntersecting) {
+
+            document
+              .querySelectorAll(".chart-bar")
+              .forEach(function (bar, index) {
+
+                setTimeout(function () {
+                  bar.classList.add("animate");
+                }, index * 180);
+
+              });
+
+            chartObserver.unobserve(entry.target);
+          }
+
+        });
+
+      }, {
+        threshold: 0.3
+      });
+
+    chartObserver.observe(climateChart);
+
+
+    /* =========================
+       CARBON CALCULATOR
+    ========================== */
     const energy =
-      Number(document.getElementById("energy").value);
+      document.getElementById("energy");
 
     const flights =
-      Number(document.getElementById("flights").value);
+      document.getElementById("flights");
+
+    const energyValue =
+      document.getElementById("energyValue");
+
+    const flightValue =
+      document.getElementById("flightValue");
+
+    const emission =
+      document.getElementById("emission");
+
+    const impactText =
+      document.getElementById("impactText");
+
+    let dietValue = 1.5;
+    let transportValue = 0.2;
 
 
-    document.getElementById("energyValue").innerText = energy;
+    document
+      .querySelectorAll("#dietGroup .choice-btn")
+      .forEach(function (button) {
 
-    document.getElementById("flightValue").innerText = flights;
+        button.addEventListener("click", function () {
+
+          document
+            .querySelectorAll("#dietGroup .choice-btn")
+            .forEach(function (btn) {
+              btn.classList.remove("active");
+            });
+
+          this.classList.add("active");
+
+          dietValue =
+            Number(this.dataset.value);
+
+          calculateFootprint();
+
+        });
+
+      });
 
 
-    const energyEmission = energy * 12 * 0.00045;
+    document
+      .querySelectorAll("#transportGroup .choice-btn")
+      .forEach(function (button) {
 
-    const flightEmission = flights * 0.35;
+        button.addEventListener("click", function () {
 
-    const total =
-      energyEmission +
-      flightEmission +
-      dietValue +
-      transportValue;
+          document
+            .querySelectorAll("#transportGroup .choice-btn")
+            .forEach(function (btn) {
+              btn.classList.remove("active");
+            });
+
+          this.classList.add("active");
+
+          transportValue =
+            Number(this.dataset.value);
+
+          calculateFootprint();
+
+        });
+
+      });
 
 
-    document.getElementById("emission").innerText =
-      total.toFixed(1);
+    energy.addEventListener(
+      "input",
+      calculateFootprint
+    );
+
+    flights.addEventListener(
+      "input",
+      calculateFootprint
+    );
 
 
-    let message = "";
+    function calculateFootprint() {
 
-    if (total < 3) {
-      message = "Excellent! Your estimated footprint is relatively low.";
+      const energyNumber =
+        Number(energy.value);
+
+      const flightNumber =
+        Number(flights.value);
+
+      energyValue.innerText =
+        energyNumber;
+
+      flightValue.innerText =
+        flightNumber;
+
+
+      const energyEmission =
+        energyNumber * 12 * 0.00045;
+
+      const flightEmission =
+        flightNumber * 0.35;
+
+      const total =
+        energyEmission +
+        flightEmission +
+        dietValue +
+        transportValue;
+
+
+      emission.innerText =
+        total.toFixed(1);
+
+
+      if (total < 3) {
+
+        impactText.innerText =
+          "Excellent! Your estimated footprint is relatively low. Keep choosing sustainable habits.";
+
+      } else if (total < 6) {
+
+        impactText.innerText =
+          "Your estimated footprint is moderate. Small improvements in energy and transport can make a difference.";
+
+      } else {
+
+        impactText.innerText =
+          "Your estimated footprint is relatively high. Consider reducing energy use, flights and private car travel.";
+
+      }
+
     }
-    else if (total < 6) {
-      message = "Near the global average. Small changes can reduce it further.";
-    }
-    else {
-      message = "High environmental impact. Try choosing greener habits.";
-    }
 
-    document.getElementById("impactText").innerText = message;
-
-  }
+    calculateFootprint();
 
 
-  /* -------------------------------
-     PLEDGE FORM
-  -------------------------------- */
+    /* =========================
+       PLEDGE FORM
+    ========================== */
+    const pledgeForm =
+      document.getElementById("pledgeForm");
 
-  function submitPledge(event) {
+    pledgeForm.addEventListener(
+      "submit",
+      function (event) {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    const name =
-      document.getElementById("name").value;
+        const name =
+          document.getElementById("pledgeName").value;
 
-    document.getElementById("pledgeMessage").innerHTML =
-      "🌱 Thank you, <b>" + name +
-      "</b>! Your promise to protect nature has been recorded.";
+        document
+          .getElementById("pledgeMessage")
+          .innerHTML =
+            "🌱 Thank you, <strong>" +
+            name +
+            "</strong>! Your EcoGuard pledge has been accepted.";
 
-    document.getElementById("name").value = "";
-    document.getElementById("email").value = "";
+        pledgeForm.reset();
 
-  }
+      }
+    );
 
-</script>
+
+    /* =========================
+       ACTIVE NAVIGATION
+    ========================== */
+    const sections =
+      document.querySelectorAll("section[id]");
+
+    const navItems =
+      document.querySelectorAll(".nav-links a");
+
+    window.addEventListener("scroll", function () {
+
+      let current = "";
+
+      sections.forEach(function (section) {
+
+        const sectionTop =
+          section.offsetTop - 150;
+
+        if (window.scrollY >= sectionTop) {
+          current = section.getAttribute("id");
+        }
+
+      });
+
+      navItems.forEach(function (item) {
+
+        item.classList.remove("active");
+
+        if (
+          item.getAttribute("href") ===
+          "#" + current
+        ) {
+          item.classList.add("active");
+        }
+
+      });
+
+    });
+
+
+    /* =========================
+       FOOTER YEAR
+    ========================== */
+    document
+      .getElementById("year")
+      .innerText =
+        new Date().getFullYear();
+  </script>
 
 </body>
 </html>
